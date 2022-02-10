@@ -1,7 +1,5 @@
 #
-# Makefile for the more03 extension to more02.c
-#   This is a minimal Makefile.  If you know more about make
-#   feel free to add fancier features.
+# Makefile for the crazy clock
 #
 
 CC = cc -Wall -Wextra -g
