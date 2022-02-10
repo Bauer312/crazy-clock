@@ -1,3 +1,4 @@
+#include <stdio.h>
 #include "libcrazytime.h"
 
 ctime_t getBinary(struct tm *curTime) {
@@ -66,4 +67,15 @@ ctime_t getHexadecimal(struct tm *curTime) {
 	hex.seconds[1] = low > 9 ? low + 55 : low + 48;
 
 	return hex;
+}
+
+ctime_t getDecimal(struct tm *curTime) {
+	ctime_t dec;
+	memset(&dec, 0, sizeof(ctime_t));
+
+	sprintf(dec.hours, "%02d", curTime->tm_hour);
+	sprintf(dec.minutes, "%02d", curTime->tm_min);
+	sprintf(dec.seconds, "%02d", curTime->tm_sec);
+
+	return dec;
 }

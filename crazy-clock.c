@@ -7,6 +7,7 @@
 #include <stdlib.h>
 #include "crazy-clock.h"
 #include "libcrazytime.h"
+#include <curses.h>
 
 int style = 0;
 
@@ -27,6 +28,9 @@ int main(int argc, char **argv) {
 		if(strcmp(argv[i], "-hex") == 0) {
 			style += 4;
 		}
+		if(strcmp(argv[i], "-dec") == 0) {
+			style += 8;
+		}
 	}
 	if(style == 0) {
 		style = 1;
@@ -35,6 +39,10 @@ int main(int argc, char **argv) {
 	// Register for the alarm signal
 	signal(SIGALRM, getTime);
 	
+	// Initialize the screen for ncurses
+	initscr();
+	clear();
+
 	// Set the alarm interval
 	if(setInterval(1000/freq) == -1) {
 		perror("setInterval");
@@ -53,32 +61,48 @@ void getTime(int signum) {
 	time_t currentTime = time(NULL);
 
 	struct tm currentTimeStruct;
+	char timeDisplay[32];
 
 	// Convert UNIX time to local time
 	localtime_r(&currentTime, &currentTimeStruct);
-	printf("%02d:%02d:%02d ",
-			currentTimeStruct.tm_hour,
-			currentTimeStruct.tm_min,
-			currentTimeStruct.tm_sec);
 
 	if((style & 1) == 1) {
-		// Convert the local time to binary
+		// Print the local time in binary
 		ctime_t bin = getBinary(&currentTimeStruct);
-		printf("(B) %s:%s:%s ", bin.hours, bin.minutes, bin.seconds);
+		sprintf(timeDisplay, "(B) %s:%s:%s",
+				bin.hours, bin.minutes, bin.seconds);
+		move(5, 5);
+		addstr(timeDisplay);
 	}
 
 	if((style & 2) == 2) {
-		// Convert the local time to octal
+		// Print the local time in octal
 		ctime_t oct = getOctal(&currentTimeStruct);
-		printf("(O) %s:%s:%s ", oct.hours, oct.minutes, oct.seconds);
+		sprintf(timeDisplay, "(O) %s:%s:%s",
+				oct.hours, oct.minutes, oct.seconds);
+		move(6,6);
+		addstr(timeDisplay);
 	}
 
 	if((style & 4) == 4) {
-		// Convert the local time to hexadecimal
+		// Print the local time in hexadecimal
 		ctime_t hex = getHexadecimal(&currentTimeStruct);
-		printf("(H) %s:%s:%s ", hex.hours, hex.minutes, hex.seconds);
+		sprintf(timeDisplay, "(H) %s:%s:%s",
+				hex.hours, hex.minutes, hex.seconds);
+		move(7,7);
+		addstr(timeDisplay);
 	}
-	printf("\n");
+	if((style & 8) == 8) {
+		// Print the local time in decimal
+		ctime_t dec = getDecimal(&currentTimeStruct);
+		sprintf(timeDisplay, "(D) %s:%s:%s",
+				dec.hours, dec.minutes, dec.seconds);
+		move(8,8);
+		addstr(timeDisplay);
+	}
+
+	// Refresh the ncurses screen
+	refresh();
 }
 
 int setInterval(int milliseconds) {

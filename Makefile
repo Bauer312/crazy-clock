@@ -7,7 +7,7 @@
 CC = cc -Wall -Wextra -g
 
 crazy-clock: crazy-clock.o libcrazytime.o
-	$(CC) crazy-clock.o libcrazytime.o -o crazy-clock
+	$(CC) crazy-clock.o libcrazytime.o -o crazy-clock -lncurses
 
 crazy-clock.o: crazy-clock.c crazy-clock.h
 	$(CC) -c crazy-clock.c

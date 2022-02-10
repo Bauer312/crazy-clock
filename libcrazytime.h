@@ -13,5 +13,6 @@ typedef struct ctime_t {
 ctime_t getBinary(struct tm *curTime);
 ctime_t getOctal(struct tm *curTime);
 ctime_t getHexadecimal(struct tm *curTime);
+ctime_t getDecimal(struct tm *curTime);
 
 #endif
