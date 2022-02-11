@@ -1,3 +1,4 @@
 *.swp
 *.o
 crazy-clock
+.DS_Store

@@ -114,6 +114,9 @@ void getTime(int signum) {
     curLine++;
 	}
 
+  // Park the cursor at the bottom right
+  move(LINES-1,COLS-1);
+
 	// Refresh the ncurses screen
 	refresh();
 }
