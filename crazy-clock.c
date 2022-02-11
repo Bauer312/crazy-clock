@@ -11,6 +11,7 @@
 
 int style = 0;
 
+
 int main(int argc, char **argv) {
 	int freq = 4;
 
@@ -42,6 +43,7 @@ int main(int argc, char **argv) {
 	// Initialize the screen for ncurses
 	initscr();
 	clear();
+  atexit(cleanup);
 
 	// Set the alarm interval
 	if(setInterval(1000/freq) == -1) {
@@ -66,13 +68,21 @@ void getTime(int signum) {
 	// Convert UNIX time to local time
 	localtime_r(&currentTime, &currentTimeStruct);
 
+  // Where ncurses will print
+  int curLine = LINES / 2;
+  int curCol = COLS / 2;
+
+  // Have ncurses clear the screen
+  clear();
+
 	if((style & 1) == 1) {
 		// Print the local time in binary
 		ctime_t bin = getBinary(&currentTimeStruct);
 		sprintf(timeDisplay, "(B) %s:%s:%s",
 				bin.hours, bin.minutes, bin.seconds);
-		move(5, 5);
+		move(curLine, curCol - (strlen(timeDisplay) / 2));
 		addstr(timeDisplay);
+    curLine++;
 	}
 
 	if((style & 2) == 2) {
@@ -80,8 +90,9 @@ void getTime(int signum) {
 		ctime_t oct = getOctal(&currentTimeStruct);
 		sprintf(timeDisplay, "(O) %s:%s:%s",
 				oct.hours, oct.minutes, oct.seconds);
-		move(6,6);
+		move(curLine, curCol - (strlen(timeDisplay) / 2));
 		addstr(timeDisplay);
+    curLine++;
 	}
 
 	if((style & 4) == 4) {
@@ -89,16 +100,18 @@ void getTime(int signum) {
 		ctime_t hex = getHexadecimal(&currentTimeStruct);
 		sprintf(timeDisplay, "(H) %s:%s:%s",
 				hex.hours, hex.minutes, hex.seconds);
-		move(7,7);
+		move(curLine, curCol - (strlen(timeDisplay) / 2));
 		addstr(timeDisplay);
+    curLine++;
 	}
 	if((style & 8) == 8) {
 		// Print the local time in decimal
 		ctime_t dec = getDecimal(&currentTimeStruct);
 		sprintf(timeDisplay, "(D) %s:%s:%s",
 				dec.hours, dec.minutes, dec.seconds);
-		move(8,8);
+		move(curLine, curCol - (strlen(timeDisplay) / 2));
 		addstr(timeDisplay);
+    curLine++;
 	}
 
 	// Refresh the ncurses screen
@@ -115,4 +128,9 @@ int setInterval(int milliseconds) {
 	newInterval.it_value.tv_usec = (milliseconds % 1000) * 1000L;
 
 	return setitimer(ITIMER_REAL, &newInterval, NULL);
+}
+
+void cleanup() {
+  // Restore everything that ncurses changed
+  endwin();
 }

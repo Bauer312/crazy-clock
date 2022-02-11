@@ -3,5 +3,6 @@
 
 void getTime(int signum);
 int setInterval(int milliseconds);
+void cleanup();
 
 #endif
