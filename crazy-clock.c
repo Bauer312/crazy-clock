@@ -6,11 +6,10 @@
 #include <unistd.h>
 #include <stdlib.h>
 #include "crazy-clock.h"
+#include "display.h"
 #include "libcrazytime.h"
-#include <curses.h>
 
 int style = 0;
-
 
 int main(int argc, char **argv) {
 	int freq = 4;
@@ -41,9 +40,7 @@ int main(int argc, char **argv) {
 	signal(SIGALRM, getTime);
 	
 	// Initialize the screen for ncurses
-	initscr();
-	clear();
-  atexit(cleanup);
+  initialize_display();
 
 	// Set the alarm interval
 	if(setInterval(1000/freq) == -1) {
@@ -63,62 +60,44 @@ void getTime(int signum) {
 	time_t currentTime = time(NULL);
 
 	struct tm currentTimeStruct;
-	char timeDisplay[32];
+	char tempDisplay[32];
 
 	// Convert UNIX time to local time
 	localtime_r(&currentTime, &currentTimeStruct);
 
-  // Where ncurses will print
-  int curLine = LINES / 2;
-  int curCol = COLS / 2;
-
-  // Have ncurses clear the screen
-  clear();
-
 	if((style & 1) == 1) {
 		// Print the local time in binary
 		ctime_t bin = getBinary(&currentTimeStruct);
-		sprintf(timeDisplay, "(B) %s:%s:%s",
+		sprintf(tempDisplay, "(B) %s:%s:%s\n",
 				bin.hours, bin.minutes, bin.seconds);
-		move(curLine, curCol - (strlen(timeDisplay) / 2));
-		addstr(timeDisplay);
-    curLine++;
+    add_display_text(tempDisplay);
 	}
 
 	if((style & 2) == 2) {
 		// Print the local time in octal
 		ctime_t oct = getOctal(&currentTimeStruct);
-		sprintf(timeDisplay, "(O) %s:%s:%s",
+		sprintf(tempDisplay, "(O) %s:%s:%s\n",
 				oct.hours, oct.minutes, oct.seconds);
-		move(curLine, curCol - (strlen(timeDisplay) / 2));
-		addstr(timeDisplay);
-    curLine++;
+    add_display_text(tempDisplay);
 	}
 
 	if((style & 4) == 4) {
 		// Print the local time in hexadecimal
 		ctime_t hex = getHexadecimal(&currentTimeStruct);
-		sprintf(timeDisplay, "(H) %s:%s:%s",
+		sprintf(tempDisplay, "(H) %s:%s:%s\n",
 				hex.hours, hex.minutes, hex.seconds);
-		move(curLine, curCol - (strlen(timeDisplay) / 2));
-		addstr(timeDisplay);
-    curLine++;
+    add_display_text(tempDisplay);
 	}
+
 	if((style & 8) == 8) {
 		// Print the local time in decimal
 		ctime_t dec = getDecimal(&currentTimeStruct);
-		sprintf(timeDisplay, "(D) %s:%s:%s",
+		sprintf(tempDisplay, "(D) %s:%s:%s\n",
 				dec.hours, dec.minutes, dec.seconds);
-		move(curLine, curCol - (strlen(timeDisplay) / 2));
-		addstr(timeDisplay);
-    curLine++;
+    add_display_text(tempDisplay);
 	}
 
-  // Park the cursor at the bottom right
-  move(LINES-1,COLS-1);
-
-	// Refresh the ncurses screen
-	refresh();
+  display_clock();
 }
 
 int setInterval(int milliseconds) {
@@ -131,9 +110,4 @@ int setInterval(int milliseconds) {
 	newInterval.it_value.tv_usec = (milliseconds % 1000) * 1000L;
 
 	return setitimer(ITIMER_REAL, &newInterval, NULL);
-}
-
-void cleanup() {
-  // Restore everything that ncurses changed
-  endwin();
 }
